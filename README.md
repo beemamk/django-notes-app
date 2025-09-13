@@ -42,7 +42,7 @@ Virtual Environment: Recommended (e.g., venv)
 
 Setup Instructions
 1. Clone the Repository
-git clone https://github.com/yourusername/django-notes-app.git
+git clone [https://github.com/beemamk/django-notes-app.git]
 Replace yourusername with your GitHub username.
 
 cd django-notes-app
