@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body class="bg-gray-100 p-8 font-sans">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Update Profile</h2>
+            <a href="{% url 'profile_view_page' %}" class="bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-semibold py-2 px-4 rounded-md transition duration-200">View Profile</a>
+        </div>
+        <form id="profileUpdateForm" class="space-y-4">
+            <input type="hidden" id="profileId">
+            <div>
+                <label for="full_name" class="block text-gray-700 font-semibold mb-1">Full Name</label>
+                <input type="text" id="full_name" name="full_name" class="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-200 transition duration-200">
+            </div>
+            <div>
+                <label for="dob" class="block text-gray-700 font-semibold mb-1">Date of Birth</label>
+                <input type="date" id="dob" name="dob" class="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-200 transition duration-200">
+            </div>
+            <div>
+                <label for="address" class="block text-gray-700 font-semibold mb-1">Address</label>
+                <textarea id="address" name="address" rows="3" class="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-200 transition duration-200"></textarea>
+            </div>
+            <div>
+                <label for="gender" class="block text-gray-700 font-semibold mb-1">Gender</label>
+                <select id="gender" name="gender" class="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-200 transition duration-200">
+                    <option value="">Select Gender</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="O">Other</option>
+                </select>
+            </div>
+            <div>
+                <label for="mobile" class="block text-gray-700 font-semibold mb-1">Mobile Number</label>
+                <input type="text" id="mobile" name="mobile" class="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-200 transition duration-200">
+            </div>
+            <div id="message" class="text-center mt-6 text-sm font-semibold text-gray-700"></div>
+            <button type="submit" class="w-full bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-semibold py-2 px-4 rounded-md transition duration-200">Save Changes</button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = '{% url "login_page" %}';
+                return;
+            }
+            
+            // Fetch profile data to pre-populate the form
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/profile/',
+                type: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token },
+                success: function(response) {
+                    console.log('-----response------', response.results)
+                    const profile = response.results[0];
+                    if (profile) {
+                        $('#profileId').val(profile.id);
+                        $('#full_name').val(profile.full_name);
+                        $('#dob').val(profile.dob);
+                        $('#address').val(profile.address);
+                        $('#gender').val(profile.gender);
+                        $('#mobile').val(profile.mobile);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        localStorage.clear();
+                        window.location.href = '{% url "login_page" %}';
+                    }
+                }
+            });
+
+            // Handle form submission
+            $('#profileUpdateForm').on('submit', function(event) {
+                event.preventDefault();
+                const profileId = $('#profileId').val();
+                if (!profileId) {
+                    $('#message').removeClass('text-green-500').addClass('text-red-500').text('No profile to update.');
+                    return;
+                }
+                
+                const updateData = {
+                    full_name: $('#full_name').val(),
+                    dob: $('#dob').val(),
+                    address: $('#address').val(),
+                    gender: $('#gender').val(),
+                    mobile: $('#mobile').val()
+                };
+
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/profile/' + profileId + '/',
+                    type: 'PATCH',
+                    contentType: 'application/json',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    data: JSON.stringify(updateData),
+                    success: function(response) {
+                        $('#message').removeClass('text-red-500').addClass('text-green-500').text('Profile updated successfully!');
+                        setTimeout(() => window.location.href = '{% url "profile_view_page" %}', 2000);
+                    },
+                    error: function(xhr) {
+                        $('#message').removeClass('text-green-500').addClass('text-red-500').text('Failed to update profile.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body class="bg-gray-100 p-8 font-sans">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Your Profile</h2>
+            <div class="flex space-x-4">
+                <a href="{% url 'notes_page' %}" class="bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-semibold py-2 px-4 rounded-md transition duration-200">Go to Notes</a>
+                <a href="{% url 'profile_update_page' %}" class="bg-yellow-100 hover:bg-yellow-200 text-gray-800 font-semibold py-2 px-4 rounded-md transition duration-200">Edit Profile</a>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-md transition duration-200">Logout</button>
+            </div>
+        </div>
+
+        <div id="profileDetails" class="space-y-4">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Username</span>
+                        <p id="username" class="text-gray-800 font-semibold text-lg"></p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Email</span>
+                        <p id="email" class="text-gray-800 font-semibold text-lg"></p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Full Name</span>
+                        <p id="full_name" class="text-gray-700"></p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Date of Birth</span>
+                        <p id="dob" class="text-gray-700"></p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Gender</span>
+                        <p id="gender" class="text-gray-700"></p>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-500">Mobile Number</span>
+                        <p id="mobile" class="text-gray-700"></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <span class="block text-sm font-medium text-gray-500">Address</span>
+                        <p id="address" class="text-gray-700"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="message" class="text-center mt-6 text-sm font-semibold text-gray-700"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const token = localStorage.getItem('access_token');
+            const refreshToken = localStorage.getItem('refresh_token');
+
+            if (!token) {
+                window.location.href = '{% url "login_page" %}';
+                return;
+            }
+
+            // Fetch profile data
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/profile/',
+                type: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token },
+                success: function(response) {
+                    // if (response.results) !{
+                    //      $('#message').text('You do not have a profile yet. Please create one on the update page.').addClass('text-red-500');
+                    // }
+                    const profile = response.results[0];
+                    if (profile) {
+                        $('#username').text(profile.user.username);
+                        $('#email').text(profile.user.email);
+                        $('#full_name').text(profile.full_name || 'N/A');
+                        $('#dob').text(profile.dob || 'N/A');
+                        $('#address').text(profile.address || 'N/A');
+                        $('#gender').text(profile.gender === 'M' ? 'Male' : profile.gender === 'F' ? 'Female' : 'Other' || 'N/A');
+                        $('#mobile').text(profile.mobile || 'N/A');
+                    } else {
+                        $('#message').text('You do not have a profile yet. Please create one on the update page.').addClass('text-red-500');
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        localStorage.clear();
+                        window.location.href = '{% url "login_page" %}';
+                    }
+                }
+            });
+
+            // Logout functionality
+            $('#logoutBtn').on('click', function() {
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/logout/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ refresh_token: refreshToken }),
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    success: function() {
+                        localStorage.clear();
+                        window.location.href = '{% url "login_page" %}';
+                    },
+                    error: function() {
+                        localStorage.clear();
+                        window.location.href = '{% url "login_page" %}';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
