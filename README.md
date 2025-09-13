@@ -1,5 +1,5 @@
 Django Notes App
-A Django-based web application for authenticated users to create, edit, delete, and manage notes with rich-text descriptions, file attachments, pagination, search, and filtering capabilities. The app includes user authentication with JWT, a secure password reset flow, and a clean, responsive frontend using Tailwind CSS and Summernote.
+A Django-based web application for authenticated users to create, edit, delete, and manage notes with rich-text descriptions, file attachments, pagination, search capabilities. The app includes user authentication with JWT, a secure password reset flow, and a clean, responsive frontend using Tailwind CSS and Summernote.
 Features
 
 User Authentication:
@@ -16,9 +16,8 @@ Pagination:
 Notes are paginated (10 notes per page) with Previous/Next controls.
 
 
-Search and Filtering:
+Search :
 Search notes by title or description.
-Filter notes by creation date (all, today, last 7 days).
 
 
 Responsive UI:
@@ -84,7 +83,6 @@ Login: Use /login/ to authenticate and receive JWT tokens.
 Notes Page:
 Access /notes/ to view, create, edit, or delete notes.
 Use search to find notes by title or description.
-Filter notes by creation date (all, today, last 7 days).
 Navigate pages using Previous/Next buttons.
 
 
